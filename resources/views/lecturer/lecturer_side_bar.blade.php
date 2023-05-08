@@ -24,7 +24,7 @@
                         </a>
                     </li> 
                     <li class="nav-item">
-                        <a href="{{route('lecturer.results.view')}}"
+                        <a href="{{route('lecturer.results')}}"
                             class="nav-link d-block  align-middle ps-2 {{request()->routeIs('lecturer.results.view')? 'active': ''}} ">
                             <i class="fa-solid text-white fa-eye"></i>
                             <span class="ms-1 d-none d-sm-inline text-white">View Results</span>

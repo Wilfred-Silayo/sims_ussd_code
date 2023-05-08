@@ -74,7 +74,7 @@ class ProgramController extends Controller
         $programs = Program::where('programID', 'like', '%'.$search.'%')->paginate(10);
         return view('admin.program.register_program')->with('programs',$programs);
         }
-        return view('admin.program.register_program');
+        return back()->with('error','Please enter search query');
     }
 
     public function destroyprogram($programID){

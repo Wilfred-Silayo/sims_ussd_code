@@ -12,9 +12,9 @@
 
                 <div class="card-body bg-light">
                     <form method="POST" action="{{ route('lecturer.login') }}">
-                        @if (Session::get('fail'))
+                        @if (Session::get('error'))
                         <div class="alert alert-danger">
-                            {{ Session::get('fail') }}
+                            {{ Session::get('error') }}
                         </div>
                         @endif
 

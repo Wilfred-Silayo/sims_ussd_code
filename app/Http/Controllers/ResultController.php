@@ -8,7 +8,9 @@ use App\Models\Enrollment;
 use App\Models\Student;
 use App\Models\Program;
 use App\Models\Module;
+use App\Models\AcademicYear;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Imports\ResultsImport;
 use App\Http\Middleware\NoCacheMiddleware;
 use Auth;
 
@@ -30,36 +32,143 @@ class ResultController extends Controller{
         $results = Student::where('username', 'like', '%'.$search.'%')->paginate(10);
         return view('admin.result.result_list')->with('results',$results);
         }
-        return view('admin.result.result_list');
+        return back()->with('error','Please enter search query');
     }
 
     public function resultsUpload(){
+
+        $currentSemester=AcademicYear::where('current',true)->first()->semester;
+        $currentYear=AcademicYear::where('current',true)->first()->year;
         $lecturer=Auth::guard('lecturer')->user()->username;
-        $modules=Module::where('lecturerID',$lecturer)->paginate(10);
+        $modules = DB::table('modules')
+        ->join('enrollment', 'modules.modulecode', '=', 'enrollment.moduleCode')
+        ->where('modules.lecturerID', '=', $lecturer)
+        ->where('modules.semester', '=', $currentSemester)
+        ->where('enrollment.academicYear', '=', $currentYear)
+        ->where('enrollment.semester', '=', $currentSemester)
+        ->select('modules.*')
+        ->distinct()->paginate(10);
+        
         return view('lecturer.results.list_modules',compact('modules'));
     }
-   
-    public function edit($moduleCode, $studentID)
-    {
-        $enrollment = Enrollment::findOrFail([$moduleCode, $studentID]);
-        return view('enrollment.edit', compact('enrollment'));
+    
+    public function resultsAdd($moduleCode,$moduleName){
+        return view('lecturer.results.new',compact('moduleCode','moduleName'));
     }
 
-    public function update(Request $request, $moduleCode, $studentID)
-    {
-        $enrollment = Enrollment::findOrFail([$moduleCode, $studentID]);
+    public function newResult(Request $request, $moduleCode){
+        $request->validate([
+            'studentID' => 'required|string',
+            'Coursework' => 'required|numeric',
+            'semesterExam' => 'required|numeric',
+        ]);
 
-        $validatedData = $request->validate([
+        $result=Enrollment::where('moduleCode', $moduleCode)
+          ->where('studentID', $request->studentID)
+          ->update(['Coursework' => $request->Coursework, 'semesterExam' => $request->semesterExam]);
+        if($result){
+        return back()->with('success',"result added Successfully");
+        }
+        return back()->with('error',"student not found");
+    }
+
+    public function excelUpload(Request $request,$moduleCode){
+        $request->validate([
+            'file'=>['required','mimes:xls,xlsx']
+        ]);
+
+        $file=$request->file(key:'file');
+        Excel::import(new ResultsImport($moduleCode),$file);
+        return back()->with('success','results Imported successfully');
+    }
+
+    public function viewStudents($moduleCode,$moduleName){
+        $students=DB::table('enrollment')->where('moduleCode',$moduleCode)
+        ->join('students','enrollment.studentID','=','students.username')
+        ->select('enrollment.studentID','students.firstname','students.lastname')->paginate(10);
+        
+        return view('lecturer.results.view_students',compact('moduleCode','moduleName','students'));
+    }
+
+    public function resultsView(){
+        $currentSemester=AcademicYear::where('current',true)->first()->semester;
+        $currentYear=AcademicYear::where('current',true)->first()->year;
+        $lecturer=Auth::guard('lecturer')->user()->username;
+        $modules = DB::table('modules')
+        ->join('enrollment', 'modules.modulecode', '=', 'enrollment.moduleCode')
+        ->where('modules.lecturerID', '=', $lecturer)
+        ->where('modules.semester', '=', $currentSemester)
+        ->where('enrollment.academicYear', '=', $currentYear)
+        ->where('enrollment.semester', '=', $currentSemester)
+        ->select('modules.*')
+        ->distinct()->paginate(10);
+        return view('lecturer.results.view_modules',compact('modules'));
+    }
+
+    public function viewStudentsResults($moduleCode,$moduleName){
+        $students=Enrollment::where('moduleCode',$moduleCode)->paginate(10);
+        return view('lecturer.results.view_results',compact('students','moduleCode','moduleName'));
+    }
+ 
+    public function destroyresult($moduleCode, $studentID)
+    {
+    $studentID=str_replace('-','/',$studentID);
+    // Find the enrollment record for the given moduleCode and studentID
+    $enrollment = Enrollment::where('moduleCode', $moduleCode)->where('studentID', $studentID)->first();
+
+    // If enrollment record exists, set the result to null and save the record
+    Enrollment::where('moduleCode', $moduleCode)
+          ->where('studentID', $studentID)
+          ->update(['CourseWork' => null, 'semesterExam' => null]);
+        return redirect()->back()->with('success', 'Result deleted successfully.');
+
+    }
+
+    public function searchStudentsResults(Request $request,$moduleCode,$moduleName)
+    {
+        $search = $request->query('studentID');
+        if (!is_null($search)){
+            $students=Enrollment::where('moduleCode',$moduleCode)
+            ->where('studentID', 'like', '%'.$search.'%')->paginate(10);
+        return view('lecturer.results.view_results',compact('moduleCode','moduleName','students'));
+        }
+        return back()->with('error', 'Please enter a search query.');
+    }
+
+    public function searchStudents(Request $request,$moduleCode,$moduleName)
+    {
+        $search = $request->query('studentID');
+        if (!is_null($search)){
+            $students=DB::table('enrollment')->where('moduleCode',$moduleCode)
+            ->where('studentID', 'like', '%'.$search.'%')
+            ->join('students','enrollment.studentID','=','students.username')
+            ->select('enrollment.studentID','students.firstname','students.lastname')->paginate(10);
+        return view('lecturer.results.view_students',compact('moduleCode','moduleName','students'));
+        }
+        return redirect()->back()->with('error', 'Please enter a search query.');
+    }
+
+   
+    public function edit($moduleCode, $studentID,$moduleName)
+    {
+        $studentID=str_replace('-','/',$studentID);
+        $result = Enrollment::where('moduleCode',$moduleCode)->where('studentID',$studentID)->first();
+        return view('lecturer.results.edit', compact('result','moduleName'));
+    }
+
+    public function update(Request $request)
+    {
+        $request->validate([
             'coursework' => 'required|numeric',
             'semester_exam' => 'required|numeric',
         ]);
 
-        $enrollment->Coursework = $validatedData['coursework'];
-        $enrollment->semesterExam = $validatedData['semester_exam'];
+        Enrollment::where('moduleCode', $request->moduleCode)
+          ->where('studentID', $request->studentID)
+          ->update(['Coursework' => $request->coursework, 'semesterExam' => $request->semester_exam]);
 
-        $enrollment->save();
-
-        return redirect()->route('enrollment.show', [$enrollment->moduleCode, $enrollment->studentID]);
+        return redirect()->route('lecturer.module.viewStudentsResults',
+        ['moduleCode'=>$request->moduleCode,'moduleName'=>$request->moduleName])->with('success',"result updated Successfully");
     }
  
     public function publish()
@@ -83,81 +192,7 @@ class ResultController extends Controller{
             return redirect()->back()->with('error', 'No results to unpublish!');
         }
     }
-    //excel
-    public function importResults(Request $request,$moduleCode)
-    {
-
-        // Get the uploaded file
-        $file = $request->file('file');
-        
-        // Read the Excel file into a collection
-        $data = Excel::toCollection(null, $file);
-        
-        // Get the column headers for the sheet
-        $headers = [];
-        
-        for ($i = 1; $i <= 5; $i++) {
-            $rowHeaders = $data[0][$i - 1]->toArray();
-        
-            if (in_array('CA', $rowHeaders) && in_array('SE', $rowHeaders) && in_array('reg_no', $rowHeaders)) {
-                // Found the row with the headers, use it
-                $headers = $rowHeaders;
-                break;
-            }
-        }
-        
-        if (!empty($headers)) {
-            // Both "CA" and "SE" columns exist, get the scores and registration number for each
-            $caIndex = array_search('CA', $headers);
-            $seIndex = array_search('SE', $headers);
-            $regNoIndex = array_search('reg_no', $headers);
-            
-            $scores = [];
-        
-            foreach ($data[0]->skip(count($headers)) as $row) {
-                $scores[] = [
-                    'reg_no' => $row[$regNoIndex],
-                    'ca_score' => $row[$caIndex],
-                    'se_score' => $row[$seIndex],
-                ];
-            }
-        
-            // Process the scores by saving them to the database
-            foreach ($scores as $score) {
-                $enrollment = Enrollment::where('studentID', $score['reg_no'])
-                    ->where('moduleCode', $moduleCode) 
-                    ->first();
-        
-                if ($enrollment) {
-                    // Update the existing record
-                    $enrollment->Coursework = $score['ca_score'];
-                    $enrollment->semesterExam = $score['se_score'];
-                    $enrollment->save();
-                } else {
-                    // Create a new record
-                    $enrollment = Enrollment();
-                    $enrollment->studentID = $score['reg_no'];
-                    $enrollment->moduleCode = $moduleCode; // replace with the actual module code
-                    $enrollment->semester = $semester; // replace with the actual semester
-                    $enrollment->academicyear = $academicYear; // replace with the actual academic year
-                    $enrollment->Coursework = $score['ca_score'];
-                    $enrollment->semesterExam = $score['se_score'];
-                    $enrollment->published = false;
-                    $enrollment->save();
-                }
-            }
-        
-            return back()->with('success', 'Enrollment records created/updated successfully.');
-        } else {
-            // The columns do not exist in any of the first five rows, handle accordingly
-            // ...
-            return back()->with('error', 'The reg_no, CA and SE do not exist in any of the first five rows');
-        }
-        
-
-    }
-
-
+    
 
     public function results()
     {   

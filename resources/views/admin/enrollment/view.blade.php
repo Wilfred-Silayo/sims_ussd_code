@@ -1,6 +1,11 @@
 @extends('layouts.admin')
 @section('title','View Enrollment')
 @section('content')
+@if (session('error'))
+<div id="success-message" class="alert alert-danger" role="alert">
+    <strong>{{ session('error') }}</strong>
+</div>
+@endif
 <div class="container" style="background-color:#ffffff">
     <div class="row mt-3 align-items-baseline">
 

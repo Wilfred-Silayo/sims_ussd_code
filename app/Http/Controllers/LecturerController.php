@@ -7,6 +7,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use App\Models\Lecturer;
+use App\Models\AcademicYear;
 use App\Models\Department;
 use App\Http\Middleware\NoCacheMiddleware;
 use Illuminate\Support\Facades\Hash;
@@ -33,12 +34,8 @@ class LecturerController extends Controller
     public function dashboard(){
         $dateOfToday=Carbon::now()->format('F d, Y');
         $currentDate=Carbon::now();
-        if($currentDate->month>=11 && $currentDate->day>=1){
-        $academicYear=$currentDate->year.'/'.($currentDate->year+1);
-        return view('lecturer.dashboard',['academicYear'=>$academicYear,'dateOfToday'=>$dateOfToday]);
-        }
-        $academicYear=($currentDate->year-1).'/'.($currentDate->year);
-        return view('lecturer.dashboard',['academicYear'=>$academicYear,'dateOfToday'=>$dateOfToday]);
+        $currentAcademicYear = AcademicYear::where('current', true)->first();
+        return view('lecturer.dashboard',['academicYear'=> $currentAcademicYear,'dateOfToday'=>$dateOfToday]);
         }
 
     public function login(Request $request){
@@ -254,7 +251,7 @@ class LecturerController extends Controller
         $lecturers = Lecturer::where('username', 'like', '%'.$search.'%')->paginate(10);
         return view('admin.lecturer.register_lecturer')->with('lecturers',$lecturers);
         }
-        return view('admin.lecturer.register_lecturer');
+        return back()->with('error','Please enter search query');
     }
     
     public function destroyLecturer($username){

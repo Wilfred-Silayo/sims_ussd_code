@@ -151,12 +151,28 @@ Route::put('/password/update', [LecturerController::class, 'update'])->name('lec
 Route::get('/password', [LecturerController::class, 'changePassword'])->name('lecturer.changePassword');
 
 //results 
-Route::get('/results/{moduleCode}/{studentId}/edit', [ResultController::class,'edit'])->name('result.edit');
-Route::put('/results/{moduleCode}/{studentId}', [ResultController::class,'update'])->name('result.update');
+Route::get('/results/{moduleCode}/{studentID}/{moduleName}/edit', [ResultController::class,'edit'])->name('result.edit');
+Route::put('/results/update/{moduleName}', [ResultController::class,'update'])->name('result.update');
 Route::get('/results/upload', [ResultController::class, 'resultsUpload'])->name('lecturer.results.upload');
-Route::get('/results/view', [ResultController::class, 'resultsView'])->name('lecturer.results.view');
+Route::get('/results', [ResultController::class, 'resultsView'])->name('lecturer.results');
+Route::get('/results/upload/{moduleCode}/{moduleName}', [ResultController::class, 'resultsAdd'])->name('lecturer.module.addresult');
+Route::post('/results/upload/new/{moduleCode}', [ResultController::class, 'newResult'])->name('lecturer.module.newResult');
+Route::get('/results/students/{moduleCode}/{moduleName}', [ResultController::class, 'viewStudents'])->name('lecturer.module.viewStudents');
+Route::get('/results/students/search/{moduleCode}/{moduleName}', [ResultController::class, 'searchStudents'])->name('lecturer.module.searchStudents');
+Route::get('/results/students/module/{moduleCode}/{moduleName}', [ResultController::class, 'viewStudentsResults'])->name('lecturer.module.viewStudentsResults');
+Route::get('/results/students/search/students/{moduleCode}/{moduleName}', [ResultController::class, 'searchStudentsResults'])->name('lecturer.results.searchResults');
+Route::delete('/results/destroy/{moduleCode}/{studentID}', [ResultController::class, 'destroyresult'])->name('result.destroy');
+
+// module view
 Route::get('/module/view', [ResultController::class, 'resultsView'])->name('lecturer.module.view');
-Route::get('/module/search', [ModuleController::class, 'search'])->name('lecturer.module.search');
+Route::get('/module/search', [ModuleController::class, 'lecturerSearchModule'])->name('lecturer.module.search');
+Route::get('/module/search/view', [ModuleController::class, 'lecturerSearchModuleView'])->name('lecturer.modules.view');
+Route::get('/module/view/modules', [ModuleController::class, 'lecturerModuleResults'])->name('lecturer.module.viewResults');
+
+// import results via excel
+Route::post('/results/upload/excel/{moduleCode}', [ResultController::class, 'excelUpload'])->name('lecturer.results.upload.excel');
+
+
 //profile
 Route::get('profile/photo', [LecturerController::class, 'fullProfile'])->name('lecturer.profile');
 Route::get('profile/photo/edit', [LecturerController::class, 'profileUpdate'])->name('lecturer.profile.edit');

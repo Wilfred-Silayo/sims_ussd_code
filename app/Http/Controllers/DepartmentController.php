@@ -58,7 +58,7 @@ class DepartmentController extends Controller
         $departments = Department::where('deptcode', 'like', '%'.$search.'%')->paginate(10);
         return view('admin.department.register_department')->with('departments',$departments);
         }
-        return view('admin.department.register_department');
+        return back()->with('error','Please enter search query');
     }
 
     public function destroydepartment($deptcode){

@@ -7,8 +7,10 @@ use App\Models\Module;
 use App\Models\Lecturer;
 use App\Models\Department;
 use App\Models\Program;
+use App\Models\AcademicYear;
 use App\Http\Middleware\NoCacheMiddleware;
 use DB;
+use Auth;
 
 class ModuleController extends Controller
 {
@@ -35,7 +37,7 @@ class ModuleController extends Controller
         $lecturers = Lecturer::all(); 
         $departments = Department::all(); 
         $programs = Program::all(); 
-        $module = module::where('modulecode', $modulecode)->first();
+        $module = Module::where('modulecode', $modulecode)->first();
         return view('admin.module.edit_module',['module'=>$module,'lecturers' => $lecturers, 
         'departments'=>$departments, 'programs' => $programs]);
     }
@@ -51,7 +53,7 @@ class ModuleController extends Controller
             'LecturerID'=>['nullable','string'],
         ]);
 
-        $module = module::create([
+        $module = Module::create([
             'modulecode' => strtoupper($request->modulecode),
             'modulename'=>$request->modulename,
             'credit'=>$request->credit,
@@ -93,14 +95,58 @@ class ModuleController extends Controller
     {
         $search = $request->query('modulecode');
         if (!is_null($search)){
-        $modules = module::where('modulecode', 'like', '%'.$search.'%')->paginate(10);
+        $modules = Module::where('modulecode', 'like', '%'.$search.'%')->paginate(10);
         return view('admin.module.register_module')->with('modules',$modules);
         }
-        return view('admin.module.register_module');
+        if (empty($search)) {
+            return redirect()->back()->with('error', 'Please enter a search query.');
+        }
+    }
+
+    public function lecturerSearchModule(Request $request)
+    {   
+        $currentSemester=AcademicYear::where('current',true)->first()->semester;
+        $currentYear=AcademicYear::where('current',true)->first()->year;
+        $lecturer=Auth::guard('lecturer')->user()->username;
+        $search = $request->query('modulecode');
+        if (empty($search)) {
+            return redirect()->back()->with('error', 'Please enter a search query.');
+        }
+        if (!is_null($search)){
+            $modules = Module::join('enrollment', 'enrollment.moduleCode', '=', 'modules.Modulecode')
+            ->where('Modules.lecturerID', $lecturer)
+            ->where('Modules.semester', $currentSemester)
+            ->where('enrollment.academicYear', $currentYear)
+            ->where('Modules.Modulecode', 'like', '%'.$search.'%')
+            ->paginate(10);
+        return view('lecturer.results.list_modules')->with('modules', $modules);
+        
+        }
+    }
+
+    public function lecturerSearchModuleView(Request $request)
+    {   
+        $currentSemester=AcademicYear::where('current',true)->first()->semester;
+        $currentYear=AcademicYear::where('current',true)->first()->year;
+        $lecturer=Auth::guard('lecturer')->user()->username;
+        $search = $request->query('modulecode');
+        if (empty($search)) {
+            return redirect()->back()->with('error', 'Please enter a search query.');
+        }
+        if (!is_null($search)){
+            $modules = Module::join('enrollment', 'enrollment.moduleCode', '=', 'modules.Modulecode')
+            ->where('Modules.lecturerID', $lecturer)
+            ->where('Modules.semester', $currentSemester)
+            ->where('enrollment.academicYear', $currentYear)
+            ->where('Modules.Modulecode', 'like', '%'.$search.'%')
+            ->paginate(10);
+            return view('lecturer.results.view_modules')->with('modules', $modules);
+        }
+       
     }
 
     public function destroymodule($modulecode){
-    $module = module::where('modulecode', $modulecode)->first();
+    $module = Module::where('modulecode', $modulecode)->first();
     $module->delete();
     return back()->with('info', 'Module deleted successfully');
     }

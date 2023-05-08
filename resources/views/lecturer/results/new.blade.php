@@ -1,117 +1,126 @@
-@extends('layouts.admin')
-@section('title','Results')
+@extends('layouts.lecturer')
+@section('title','Results Upload')
 @section('content')
-
-@if (session('info'))
-<div id="success-message" class="alert alert-success alert-dismissible fade show" role="alert">
+@if (session('success'))
+<div id="success-message" class="alert alert-success " role="alert">
     <strong>{{ session('success') }}</strong>
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>
 @endif
-<div class="container" style="background-color:#ffffff">
-    <div class="row mt-3 align-items-baseline">
-        <a href="{{route('module.result.form')}}" class='btn btn-success col-1 mt-2'>
-            <i class="fa fa-plus"></i> New
-        </a>
-
-        <div class="col-md-3 offset-2 mt-2">
-            <h2>Results</h2>
+@if (session('error'))
+<div id="error-message" class="alert alert-danger " role="alert">
+    <strong>{{ session('error') }}</strong>
+</div>
+@endif
+<div class="container">
+    <h3>Upload Results </h3>
+    <div class="row bg-light py-3">
+        <div class="col-md-3">
+            {{$moduleCode}}
         </div>
-
-        <div class="col-md-6">
-            <form class="d-flex" action="{{ route('result.search',$result->moduleCode) }}" method="GET">
-                <input class="form-control me-2" name="studentID" type="search" placeholder="Search by Student Reg No"
-                    aria-label="Search">
-                <button class="btn btn-outline-success" type="submit">Search</button>
-            </form>
+        <div class="col-md-9">
+            {{$moduleName}}
         </div>
     </div>
-
-    <div class="row mt-3">
-        @if ($results->isEmpty())
-        <div class="alert alert-info">
-            No records found. <a class="ms-2"
-                href="{{route('result.search')}}">{{request()->routeIs('result.search')?'':'Go back'}}</a> <a
-                class="ms-2" href="{{route('lecturer.dashboard')}}">Go To Dashboard</a>
-        </div>
-        @else
-        <table id="example1" class="table table-striped table-hover">
-            <thead>
-                <th>Registration Number</th>
-                <th>Course Work</th>
-                <th>Semester Exam</th>
-                <th>Actions</th>
-            </thead>
-            <tbody>
-                @foreach($results as $result)
-                <tr>
-                    <td>{{$result->studentID}}</td>
-                    <td>{{$result->Coursework}}</td>
-                    <td>{{$result->semesterExam}}</td>
-                    <td>
-                        <a href="{{ route('module.result.edit', ['studentID'=>str_replace('/', '-', $result->studentID),
-                            'moduleCode'=>$result->moduleCode]) }}" class='btn btn-success btn-sm edit btn-flat'>
-                            <i class='fa fa-edit'></i> Edit
-                        </a>
-
-                        <button class='btn btn-danger btn-sm delete btn-flat' data-bs-toggle="modal"
-                            data-bs-target="#delete" data-studentID="{{str_replace('/','-',$result->studentID)}}"
-                            data-moduleCode="{{$result->moduleCode}}" >
-                            <i class='fa fa-trash'></i> Delete
-                        </button>
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-        @endif
-        {{ $results->links('layouts.paginationlinks') }}
+    <div class="row bg-light">
+        <form action="{{route('lecturer.module.newResult',$moduleCode)}}" method="POST">
+            @csrf
+            <div class="form-group row pt-3">
+                <label for="studentID" class="col-sm-4 col-form-label">Student Registration Number</label>
+                <div class="col-sm-10">
+                    <input type="text" id="studentID" class="form-control  @error('studentID') is-invalid @enderror"
+                        name="studentID" value="{{ old('studentID') }}" autocomplete="studentID" autofocus
+                        placeholder="Enter Student Registration Number">
+                    @error('studentID')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                    @enderror
+                </div>
+            </div>
+            <div class="form-group row pt-3">
+                <label for="Coursework" class="col-sm-4 col-form-label">Course work</label>
+                <div class="col-sm-10">
+                    <input type="number" id="Coursework" class="form-control  @error('Coursework') is-invalid @enderror"
+                        name="Coursework" value="{{ old('Coursework') }}" autocomplete="Coursework" autofocus
+                        placeholder="Enter the course work marks">
+                    @error('Coursework')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                    @enderror
+                </div>
+            </div>
+            <div class="form-group row pt-3">
+                <label for="semesterExam" class="col-sm-4 col-form-label">Semester Exam</label>
+                <div class="col-sm-10">
+                    <input type="number" id="semesterExam"
+                        class="form-control  @error('semesterExam') is-invalid @enderror" name="semesterExam"
+                        value="{{ old('semesterExam') }}" autocomplete="semesterExam" autofocus
+                        placeholder="Enter the semester Exam marks">
+                    @error('semesterExam')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                    @enderror
+                </div>
+            </div>
+            <div class="form-group row pt-3 d-flexpt-3 justify-content-start">
+                <div class="col-sm-10 ">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </div>
+        </form>
     </div>
+    <div class="row mt-2 bg-secondary mb-4">
+        <h4 class="text-white">Use Excel To import multiple records</h4>
+        <img src="{{asset('images/excel_sample.jpg')}}" alt="excel sample">
+        <div class="row bg-light mt-4">
+            <div class="col-md-6">
+                <h5 class="text-primary">Note:</h5>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">Your excel file should have headers in the first row as above</li>
+                    <li class="list-group-item">Consider The column Name. Each column name must read as it is shown in
+                        the excel above</li>
+                </ul>
 
-    <!--delete result Modal -->
-    <div class="modal fade" id="delete" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-        aria-labelledby="deleteLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="deleteModalLabel">Are you sure you want to delete?</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Do you really want to delete <strong><span id="delete-result-name"></span></strong>?</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary btn-sm btn-flat"
-                        data-bs-dismiss="modal">Cancel</button>
-                    <form id="delete-result-form" method="POST"
-                        action="{{ route('result.destroy', ['studentID' => '__studentID__','moduleCode'=>$result->moduleCode]) }}">
-                        @csrf
-                        @method('DELETE')
-                        <button class='btn btn-danger btn-sm delete btn-flat' type="submit"
-                            data-bs-dismiss="modal">Delete</button>
-                    </form>
-                </div>
+                <style>
+                .list-group-flush .list-group-item::before {
+                    content: "•";
+                    margin-right: 0.5rem;
+                }
+                </style>
+            </div>
+            <div class="col-md-6">
+                <form action="{{route('lecturer.results.upload.excel',$moduleCode)}}" method="POST"
+                    enctype="multipart/form-data">
+                    @if (session('status'))
+                    <div class="alert alert-success" role="alert">
+                        {{ session('status') }}
+                    </div>
+                    @endif
+                    @csrf
+                    <div class="mb-3">
+                        <label for="formFile" class="form-label">
+                            <h5 class="text-primary">Import Excel file only</h5>
+                        </label>
+                        <div class="col">
+                            <input class="form-control @error('file') is-invalid @enderror" type="file" id="formFile"
+                                name="file">
+                            @error('file')
+                            <span class="invalid-feedback" role="alert">
+                                <strong>{{ $message }}</strong>
+                            </span>
+                            @enderror
+                        </div>
+                        <div class="col-sm-10">
+                            <button type="submit" class="btn btn-primary mt-2">Import</button>
+                        </div>
+                    </div>
+                </form>
+
             </div>
         </div>
     </div>
+</div>
 
-    <script>
-    const deleteButtons = document.querySelectorAll('.delete');
-
-    deleteButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            const studentID = button.getAttribute('data-studentID');
-            const moduleCode = button.getAttribute('data-moduleCode');
-            const deleteResultForm = document.querySelector('#delete-result-form');
-            const deleteResultName = document.querySelector('#delete-result-name');
-            const deleteResultAction = deleteResultForm.getAttribute('action').replace(
-                '__studentID__', studentID);
-            deleteResultForm.setAttribute('action', deleteResultAction);
-            deleteResultName.textContent = `${studentID}`;
-
-        });
-    });
-    </script>
-
-
-    @endsection
+@endsection

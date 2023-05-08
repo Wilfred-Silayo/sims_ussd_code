@@ -8,6 +8,11 @@
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>
 @endif
+@if (session('error'))
+<div id="success-message" class="alert alert-danger" role="alert">
+    <strong>{{ session('error') }}</strong>
+</div>
+@endif
 <div class="container" style="background-color:#ffffff">
     <div class="row mt-3 align-items-baseline">
         <a href="{{route('register.module.form')}}" class='btn btn-success col-1 mt-2'>

@@ -18,41 +18,6 @@ class EnrollmentController extends Controller
     }
 
 
-    // public function store(Request $request)
-    // {
-    //     $currentAcademicYear = AcademicYear::where('current', true)->first();
-    //     $currentYear=$currentAcademicYear->year;
-    //     $currentSemester= $currentAcademicYear->semester;
-    
-    //     // Retrieve the selected modules from the form input
-    //     $selectedModules = $request->input('course', []);
-    
-    //     // Loop through the selected modules and create an enrollment record for each
-    //     foreach ($selectedModules as $moduleCode) {
-    //         // Check if enrollment already exists for this module by this user in this academic year and semester
-    //         $enrollmentExists = Enrollment::where('studentID', Auth::user()->username)
-    //             ->where('modulecode', $moduleCode)
-    //             ->where('academicYear', $currentYear)
-    //             ->where('semester', $currentSemester)
-    //             ->exists();
-    
-    //         if (!$enrollmentExists) {
-    //             $enrollment = new Enrollment;
-    //             $enrollment->studentID = Auth::user()->username;
-    //             $enrollment->modulecode = $moduleCode;
-    //             $enrollment->semester = $currentSemester;
-    //             $enrollment->academicYear = $currentYear;
-    //             $enrollment->save();
-    //         } else {
-    //             // Return an error if an enrollment already exists for this module
-    //             return back()->with('error', 'Enrollment for module ' . $moduleCode . ' already exists.');
-    //         }
-    //     }
-    
-    //     // Redirect back to the course registration page
-    //     return back()->with('success', 'Enrollment successful.');
-    // }
-    
     public function store(Request $request)
     {
         $currentAcademicYear = AcademicYear::where('current', true)->first();
@@ -108,7 +73,7 @@ class EnrollmentController extends Controller
         $enrollments = Enrollment::where('studentID', 'like', '%'.$search.'%')->paginate(10);
         return view('admin.enrollment.view')->with('enrollments',$enrollments);
         }
-        return view('admin.enrollment.view');
+        return back()->with('error','Please enter search query');
     }
   
     public function enroll(Request $request){

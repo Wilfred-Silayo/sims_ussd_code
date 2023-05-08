@@ -177,7 +177,7 @@ public function search(Request $request)
     $students = Student::where('username', 'like', '%'.$search.'%')->paginate(10);
     return view('admin.student.register_student')->with('students',$students);
     }
-    return view('admin.student.register_student');
+    return back()->with('error','Please enter search query');
 }
 
 public function destroystudent($username){

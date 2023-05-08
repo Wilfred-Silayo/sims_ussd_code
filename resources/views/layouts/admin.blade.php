@@ -64,7 +64,7 @@
         </nav>
         <!-- Left nav-bar -->
         @if(auth()->guard('admin')->check())
-        <!--student dashboard-->
+        <!--admin dashboard-->
         @include('admin.admin_side_bar')
 
         @else

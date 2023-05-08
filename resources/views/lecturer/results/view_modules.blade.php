@@ -11,12 +11,12 @@
     <div class="row mt-3 align-items-baseline">
 
         <div class="col-md-3 offset-2 mt-2">
-            <h2>Upload Results</h2>
+            <h2>View Results</h2>
         </div>
 
         <div class="col-md-6">
-            <form class="d-flex" action="{{ route('lecturer.module.search') }}" method="GET">
-                <input class="form-control me-2" name="modulecode" type="search" placeholder="Search by Student Reg No"
+            <form class="d-flex" action="{{ route('lecturer.modules.view') }}" method="GET">
+                <input class="form-control me-2" name="modulecode" type="search" placeholder="Search "
                     aria-label="Search">
                 <button class="btn btn-outline-success" type="submit">Search</button>
             </form>
@@ -46,15 +46,9 @@
                     <td>{{$module->elective}}</td>
                     <td>{{$module->program}}</td>
                     <td>
-                        <a href="{{ route('lecturer.module.viewStudents', 
-                            ['moduleCode'=>$module->modulecode,'moduleName'=>$module->modulename]) }}"
+                        <a href="{{ route('lecturer.module.viewStudentsResults',['moduleCode'=> $module->modulecode,'moduleName'=>$module->modulename]) }}"
                             class='btn btn-success btn-sm edit btn-flat'>
-                            <i class='fa fa-eye'></i> My students
-                        </a>
-                        <a href="{{ route('lecturer.module.addresult', 
-                            ['moduleCode'=>$module->modulecode,'moduleName'=>$module->modulename]) }}"
-                            class='btn btn-success btn-sm edit btn-flat'>
-                            <i class='fa fa-plus'></i> Add Result
+                            <i class='fa fa-eye'></i> View Result
                         </a>
                     </td>
                 </tr>
