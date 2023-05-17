@@ -171,7 +171,7 @@ Route::get('/module/view/modules', [ModuleController::class, 'lecturerModuleResu
 
 // import results via excel
 Route::post('/results/upload/excel/{moduleCode}', [ResultController::class, 'excelUpload'])->name('lecturer.results.upload.excel');
-
+Route::get('/results/excel/download/{moduleCode}', [ResultController::class, 'excelDownload'])->name('lecturer.results.download.excel');
 
 //profile
 Route::get('profile/photo', [LecturerController::class, 'fullProfile'])->name('lecturer.profile');

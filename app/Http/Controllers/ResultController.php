@@ -11,6 +11,7 @@ use App\Models\Module;
 use App\Models\AcademicYear;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\ResultsImport;
+use App\Exports\EnrollmentExport;
 use App\Http\Middleware\NoCacheMiddleware;
 use Auth;
 
@@ -82,8 +83,25 @@ class ResultController extends Controller{
         return back()->with('success','results Imported successfully');
     }
 
-    public function viewStudents($moduleCode,$moduleName){
+    public function excelDownload(Request $request,$moduleCode){
+        $currentSemester=AcademicYear::where('current',true)->first()->semester;
+        $currentYear=AcademicYear::where('current',true)->first()->year;
+
         $students=DB::table('enrollment')->where('moduleCode',$moduleCode)
+        ->where('academicYear',$currentYear)->where('semester',$currentSemester)
+        ->join('students','enrollment.studentID','=','students.username')
+        ->select('enrollment.studentID','students.firstname','students.lastname')->get();
+
+        return (new EnrollmentExport($students))->download($moduleCode.'.xlsx');
+        
+    }
+
+    public function viewStudents($moduleCode,$moduleName){
+        $currentSemester=AcademicYear::where('current',true)->first()->semester;
+        $currentYear=AcademicYear::where('current',true)->first()->year;
+        
+        $students=DB::table('enrollment')->where('moduleCode',$moduleCode)
+        ->where('academicYear',$currentYear)->where('semester',$currentSemester)
         ->join('students','enrollment.studentID','=','students.username')
         ->select('enrollment.studentID','students.firstname','students.lastname')->paginate(10);
         
@@ -106,7 +124,11 @@ class ResultController extends Controller{
     }
 
     public function viewStudentsResults($moduleCode,$moduleName){
-        $students=Enrollment::where('moduleCode',$moduleCode)->paginate(10);
+        $currentSemester=AcademicYear::where('current',true)->first()->semester;
+        $currentYear=AcademicYear::where('current',true)->first()->year;
+        
+        $students=DB::table('enrollment')->where('moduleCode',$moduleCode)
+        ->where('academicYear',$currentYear)->where('semester',$currentSemester)->paginate(10);
         return view('lecturer.results.view_results',compact('students','moduleCode','moduleName'));
     }
  

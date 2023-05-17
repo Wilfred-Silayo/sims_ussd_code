@@ -16,12 +16,12 @@ class AdminSeeder extends Seeder
     {
         Admin::factory()->create([
             'username' => 'Admin',
-            'email' => 'wilfredsilayo99@gmail.com',
-            'firstname'=>'Wilfred',
-            'middlename'=>'D',
-            'lastname'=>'Silayo',
+            'email' => 'halfanimfanga821@gmail.com',
+            'firstname'=>'Halfani',
+            'middlename'=>'Admin',
+            'lastname'=>'Mfanga',
             'gender'=>'Male',
-            'phone'=>'0683415683',
+            'phone'=>'0755415684',
             'maritalstatus'=>'single',
             'nationality'=>'Tanzanian',
             'password' => bcrypt('password'),

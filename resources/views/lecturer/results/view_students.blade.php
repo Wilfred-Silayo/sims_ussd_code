@@ -11,7 +11,13 @@
         <div class="col-md-3 offset-2 mt-2">
             <h3>My Students </h3>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-2">
+            <a href="{{route('lecturer.results.download.excel',$moduleCode)}}" class="btn btn-primary">
+            <i class="fa-solid text-white fa-download"></i>
+            <span class="ms-1 d-none d-sm-inline text-white">Export</span>
+            </a>
+        </div>
+        <div class="col-md-5">
             <form class="d-flex"
                 action="{{ route('lecturer.module.searchStudents',['moduleCode'=>$moduleCode,'moduleName'=>$moduleName]) }}"
                 method="GET">
