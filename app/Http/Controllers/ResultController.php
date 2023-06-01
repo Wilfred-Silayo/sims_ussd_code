@@ -283,8 +283,8 @@ class ResultController extends Controller{
             $totalCreditsForSemesterOne += $result->credit;
             $totalGradePointsForSemesterOne += ($gradePoint * $result->credit);
         }
-        $semesterOneGPA = $totalCreditsForSemesterOne > 0 ? round($totalGradePointsForSemesterOne / $totalCreditsForSemesterOne, 2) : 0;
-        
+        $semesterOneGPA = $totalCreditsForSemesterOne > 0 ? $totalGradePointsForSemesterOne / $totalCreditsForSemesterOne : 0;
+        $semesterOneGPA = number_format($semesterOneGPA, 1);
         //get results for second semester
         $semesterTwoResults = DB::table('enrollment')
                                 ->join('modules', 'enrollment.moduleCode', '=', 'modules.modulecode')
@@ -334,12 +334,13 @@ class ResultController extends Controller{
             $totalCreditsForSemesterTwo += $result->credit;
             $totalGradePointsForSemesterTwo += ($gradePoint * $result->credit);
         }
-        $semesterTwoGPA = $totalCreditsForSemesterTwo > 0 ? round($totalGradePointsForSemesterTwo / $totalCreditsForSemesterTwo, 2) : 0;
-
+        $semesterTwoGPA = $totalCreditsForSemesterTwo > 0 ? $totalGradePointsForSemesterTwo / $totalCreditsForSemesterTwo : 0;
+        $semesterTwoGPA = number_format($semesterTwoGPA, 1);
                 //calculate annual GPA
         $totalCreditsForYear = $totalCreditsForSemesterOne + $totalCreditsForSemesterTwo;
         $totalGradePointsForYear = $totalGradePointsForSemesterOne + $totalGradePointsForSemesterTwo;
-        $annualGPA = $totalCreditsForYear > 0 ? round($totalGradePointsForYear / $totalCreditsForYear, 2) : 0;
+        $annualGPA = $totalCreditsForYear > 0 ? $totalGradePointsForYear / $totalCreditsForYear : 0;
+        $annualGPA = number_format($annualGPA, 1);
         if($annualGPA < 2) {
             $annualRemark = 'Discontinue';
         } else {
@@ -432,8 +433,8 @@ class ResultController extends Controller{
                 $totalCreditsForSemesterOne += $result->credit;
                 $totalGradePointsForSemesterOne += ($gradePoint * $result->credit);
             }
-            $semesterOneGPA = $totalCreditsForSemesterOne > 0 ? round($totalGradePointsForSemesterOne / $totalCreditsForSemesterOne, 2) : 0;
-            
+            $semesterOneGPA = $totalCreditsForSemesterOne > 0 ? $totalGradePointsForSemesterOne / $totalCreditsForSemesterOne : 0;
+            $semesterOneGPA = number_format($semesterOneGPA, 1);
             //get results for second semester
             $semesterTwoResults = DB::table('enrollment')
                                     ->join('modules', 'enrollment.moduleCode', '=', 'modules.modulecode')
@@ -482,12 +483,13 @@ class ResultController extends Controller{
                 $totalCreditsForSemesterTwo += $result->credit;
                 $totalGradePointsForSemesterTwo += ($gradePoint * $result->credit);
             }
-            $semesterTwoGPA = $totalCreditsForSemesterTwo > 0 ? round($totalGradePointsForSemesterTwo / $totalCreditsForSemesterTwo, 2) : 0;
-
+            $semesterTwoGPA = $totalCreditsForSemesterTwo > 0 ? $totalGradePointsForSemesterTwo / $totalCreditsForSemesterTwo : 0;
+            $semesterTwoGPA = number_format($semesterTwoGPA, 1);
                     //calculate annual GPA
             $totalCreditsForYear = $totalCreditsForSemesterOne + $totalCreditsForSemesterTwo;
             $totalGradePointsForYear = $totalGradePointsForSemesterOne + $totalGradePointsForSemesterTwo;
-            $annualGPA = $totalCreditsForYear > 0 ? round($totalGradePointsForYear / $totalCreditsForYear, 2) : 0;
+            $annualGPA = $totalCreditsForYear > 0 ? $totalGradePointsForYear / $totalCreditsForYear: 0;
+            $annualGPA = number_format($annualGPA, 1);
             if($annualGPA < 2) {
                 $annualRemark = 'Discontinue';
             } else {

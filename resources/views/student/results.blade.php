@@ -49,8 +49,8 @@
                 <td class=" border-0"></td>
                 <td class=" border-0"></td>
                 <td class=" border-0">Semester GPA</td>
-                <td>{{ number_format($result['semesterOneGPA'], 2) }}</td>
-                <td>@if($result['semesterOneGPA'] < 2.00) Discontinued @else Pass @endif </td>
+                <td>{{ $result['semesterOneGPA']}}</td>
+                <td>@if($result['semesterOneGPA'] < 2.0) Fail @else Pass @endif </td>
             </tr>
         </tbody>
     </table>
@@ -93,8 +93,8 @@
                 <td class=" border-0"></td>
                 <td class=" border-0"></td>
                 <td class=" border-0">Semester GPA</td>
-                <td>{{ number_format($result['semesterTwoGPA'], 2) }}</td>
-                <td>@if($result['semesterTwoGPA'] < 2.00) Discontinued @else Pass @endif </td>
+                <td>{{ $result['semesterTwoGPA']}}</td>
+                <td>@if($result['semesterTwoGPA'] < 2.0) Fail @else Pass @endif </td>
             </tr>
         </tbody>
     </table>
